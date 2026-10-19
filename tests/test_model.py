@@ -19,7 +19,7 @@ class ModelTests(unittest.TestCase):
                 ask_model("1+1")
 
     def test_comparison_is_mockable_and_no_network_needed(self):
-        with patch("atlas.llm_experiment.ask_model", side_effect=["41", "104", "31"]):
+        with patch("atlas.llm_experiment.ask_model", side_effect=["41", "104", "30"]):
             result = evaluate()
         self.assertEqual(result["correct"], 2)
         self.assertEqual(result["total"], 3)
