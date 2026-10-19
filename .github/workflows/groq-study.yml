@@ -1,0 +1,32 @@
+name: ATLAS Groq manual study
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired-study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: atlas-research
+    env:
+      ATLAS_MODEL_ENDPOINT: https://api.groq.com/openai/v1/chat/completions
+      ATLAS_MODEL_NAME: openai/gpt-oss-20b
+      ATLAS_MODEL_API_KEY: ${{ secrets.GROQ_API_KEY }}
+    steps:
+      - name: Checkout trusted main
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify secret is configured
+        shell: bash
+        run: |
+          if [ -z "$ATLAS_MODEL_API_KEY" ]; then
+            echo "GROQ_API_KEY is missing; no requests performed."
+            exit 1
+          fi
+      - name: Run bounded paired experiment
+        run: python -m atlas.run_live_study
