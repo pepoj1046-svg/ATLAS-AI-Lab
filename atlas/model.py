@@ -7,6 +7,7 @@ import json
 import os
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 
 
 class ModelUnavailable(RuntimeError):
@@ -51,8 +52,18 @@ def ask_model(question: str, context: str = "") -> str:
             if response.status != 200:
                 raise ModelUnavailable("Provider returned non-200 status")
             raw = response.read(100_001)
-    except Exception as exc:
-        raise ModelUnavailable("Inference request failed; consult provider status and configured URL") from exc
+    except HTTPError as exc:
+        # Never expose provider responses, tokens, or request headers in logs.
+        guidance = {
+            400: "Invalid request parameters.",
+            401: "Check API key validity and expiration.",
+            403: "Check Groq organization and project model permissions.",
+            404: "Check model identifier or endpoint.",
+            429: "Rate limit reached.",
+        }.get(exc.code, "Provider rejected request.")
+        raise ModelUnavailable(f"Provider HTTP {exc.code}: {guidance}") from None
+    except (URLError, TimeoutError, OSError):
+        raise ModelUnavailable("Network or timeout error") from None
     if len(raw) > 100_000:
         raise ModelUnavailable("Response too large")
     try:
