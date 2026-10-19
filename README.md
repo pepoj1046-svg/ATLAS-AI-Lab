@@ -15,6 +15,14 @@ python -m atlas.experiment
 
 The smoke benchmark evaluates four candidate answers, three correct and one deliberately incorrect. It is a test of the evaluator, not evidence of agent learning.
 
+### Verified-memory demonstration
+
+```bash
+python -m atlas.comparison
+```
+
+This second demonstration uses SQLite to persist three preverified arithmetic rules, then tests six distinct numeric examples. Its deliberately weak no-memory baseline always returns zero. The memory arm retrieves rules and computes answers. This **demonstrates retrieval and persistence only**. It does not show that a language model has learned or that the method outperforms a reasonable arithmetic baseline.
+
 ## Roadmap
 1. Verified experiment records and persistence.
 2. Baseline and memory-enabled agent adapters.
