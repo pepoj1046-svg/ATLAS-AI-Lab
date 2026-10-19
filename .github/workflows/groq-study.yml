@@ -7,7 +7,6 @@ jobs:
   paired-study:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    environment: atlas-research
     env:
       ATLAS_MODEL_ENDPOINT: https://api.groq.com/openai/v1/chat/completions
       ATLAS_MODEL_NAME: openai/gpt-oss-20b
