@@ -1,0 +1,22 @@
+name: ATLAS Groq one-request diagnostic
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      ATLAS_MODEL_ENDPOINT: https://api.groq.com/openai/v1/chat/completions
+      ATLAS_MODEL_NAME: openai/gpt-oss-20b
+      ATLAS_MODEL_API_KEY: ${{ secrets.GROQ_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Send exactly one diagnostic request
+        run: python -m atlas.groq_diagnostic
