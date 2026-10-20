@@ -61,7 +61,21 @@ def ask_model(question: str, context: str = "") -> str:
             404: "Check model identifier or endpoint.",
             429: "Rate limit reached.",
         }.get(exc.code, "Provider rejected request.")
-        raise ModelUnavailable(f"Provider HTTP {exc.code}: {guidance}") from None
+        # Only emit a tightly allowlisted provider error code, never its message.
+        provider_code = "unclassified"
+        try:
+            parsed = json.loads(exc.read(4096).decode("utf-8"))
+            candidate = parsed.get("error", {}).get("code")
+            if candidate in ("model_permission_blocked_org",
+                             "model_permission_blocked_project",
+                             "permission_denied", "invalid_api_key",
+                             "insufficient_permissions"):
+                provider_code = candidate
+        except (ValueError, UnicodeError, AttributeError, TypeError, OSError):
+            pass
+        raise ModelUnavailable(
+            f"Provider HTTP {exc.code} [{provider_code}]: {guidance}"
+        ) from None
     except (URLError, TimeoutError, OSError):
         raise ModelUnavailable("Network or timeout error") from None
     if len(raw) > 100_000:
